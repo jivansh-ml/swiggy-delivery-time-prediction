@@ -90,5 +90,5 @@ target/
 
 
 # Project data
-data/cleaned/
+data/cleaned/swiggy_cleaned.csv
 
