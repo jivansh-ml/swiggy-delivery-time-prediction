@@ -1,11 +1,9 @@
-import json
-import logging
-import os
-from pathlib import Path
-
-import dagshub
 import mlflow
+import dagshub
+import json
+from pathlib import Path
 from mlflow import MlflowClient
+import logging
 
 
 # create logger
@@ -24,29 +22,16 @@ formatter = logging.Formatter(fmt='%(asctime)s - %(name)s - %(levelname)s - %(me
 # add formatter to handler
 handler.setFormatter(formatter)
 
-def configure_mlflow(root_path: Path) -> None:
-    os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
-    use_dagshub = os.getenv("USE_DAGSHUB", "0").lower() in {"1", "true", "yes", "on"}
+# initialize dagshub
+import dagshub
+import mlflow.client
 
-    if use_dagshub:
-        try:
-            dagshub.init(
-                repo_owner="jivanshs51",
-                repo_name="swiggy-delivery-time-prediction",
-                mlflow=True,
-            )
-            mlflow.set_tracking_uri(
-                "https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction.mlflow"
-            )
-            logger.info("Configured MLflow tracking with DagsHub")
-            return
-        except Exception as exc:
-            logger.warning("DagsHub initialization failed, falling back to local MLflow: %s", exc)
+dagshub.init(repo_owner='jivanshs51',
+              repo_name='swiggy-delivery-time-prediction',
+                mlflow=True)
 
-    tracking_dir = root_path / "mlruns"
-    tracking_dir.mkdir(exist_ok=True)
-    mlflow.set_tracking_uri(tracking_dir.as_uri())
-    logger.info("Configured MLflow tracking locally at %s", tracking_dir)
+# set the mlflow tracking server
+mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction.mlflow")
 
 
 def load_model_information(file_path):
@@ -59,8 +44,7 @@ def load_model_information(file_path):
 if __name__ == "__main__":
     # root path
     root_path = Path(__file__).parent.parent.parent
-    configure_mlflow(root_path)
-
+    
     # run information file path
     run_info_path = root_path / "run_information.json"
     

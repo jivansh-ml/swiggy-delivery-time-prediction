@@ -1,14 +1,25 @@
-import os
-import json
-import logging
-from pathlib import Path
-
-import joblib
-import mlflow
 import pandas as pd
+import joblib
+import logging
+import mlflow
 import dagshub
-from sklearn.metrics import mean_absolute_error, r2_score
+from pathlib import Path
 from sklearn.model_selection import cross_val_score
+from sklearn.metrics import mean_absolute_error, r2_score
+import json
+
+
+# initialize dagshub
+import dagshub
+dagshub.init(repo_owner='jivanshs51',
+              repo_name='swiggy-delivery-time-prediction',
+                mlflow=True)
+
+# set the mlflow tracking server
+mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction.mlflow")
+
+# set mlflow experment name
+mlflow.set_experiment("DVC Pipeline")
 
 TARGET = "time_taken"
 
@@ -49,48 +60,19 @@ def load_model(model_path: Path):
     return model
 
 
-def save_model_info(save_json_path, run_id, artifact_path, model_name):
+def save_model_info(save_json_path,run_id, artifact_path, model_name):
     info_dict = {
         "run_id": run_id,
         "artifact_path": artifact_path,
-        "model_name": model_name,
+        "model_name": model_name
     }
-    with open(save_json_path, "w") as f:
-        json.dump(info_dict, f, indent=4)
-
-
-def configure_mlflow(root_path: Path) -> None:
-    os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
-    use_dagshub = os.getenv("USE_DAGSHUB", "0").lower() in {"1", "true", "yes", "on"}
-
-    if use_dagshub:
-        try:
-            dagshub.init(
-                repo_owner="jivanshs51",
-                repo_name="swiggy-delivery-time-prediction",
-                mlflow=True,
-            )
-            mlflow.set_tracking_uri(
-                "https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction.mlflow"
-            )
-            logger.info("Configured MLflow tracking with DagsHub")
-            mlflow.set_experiment("DVC Pipeline")
-            return
-        except Exception as exc:
-            logger.warning("DagsHub initialization failed, falling back to local MLflow: %s", exc)
-
-    tracking_dir = root_path / "mlruns"
-    tracking_dir.mkdir(exist_ok=True)
-    mlflow.set_tracking_uri(tracking_dir.as_uri())
-    mlflow.set_experiment("DVC Pipeline")
-    logger.info("Configured MLflow tracking locally at %s", tracking_dir)
+    with open(save_json_path,"w") as f:
+        json.dump(info_dict,f,indent=4)
 
 
 if __name__ == "__main__":
     # root path
     root_path = Path(__file__).parent.parent.parent
-    configure_mlflow(root_path)
-
     # train data load path
     train_data_path = root_path / "data" / "processed" / "train_trans.csv"
     test_data_path = root_path / "data" / "processed" / "test_trans.csv"
@@ -144,57 +126,62 @@ if __name__ == "__main__":
     
     # log with mlflow
     with mlflow.start_run() as run:
-        try:
-            mlflow.set_tag("model", "Food Delivery Time Regressor")
-            mlflow.log_params(model.get_params())
-            mlflow.log_metric("train_mae", train_mae)
-            mlflow.log_metric("test_mae", test_mae)
-            mlflow.log_metric("train_r2", train_r2)
-            mlflow.log_metric("test_r2", test_r2)
-            mlflow.log_metric("mean_cv_score", -(cv_scores.mean()))
-            mlflow.log_metrics({f"CV {num}": score for num, score in enumerate(-cv_scores)})
+        # set tags
+        mlflow.set_tag("model","Food Delivery Time Regressor")
 
-            try:
-                train_data_input = mlflow.data.from_pandas(train_data, targets=TARGET)
-                test_data_input = mlflow.data.from_pandas(test_data, targets=TARGET)
-                mlflow.log_input(dataset=train_data_input, context="training")
-                mlflow.log_input(dataset=test_data_input, context="validation")
-            except Exception as exc:
-                logger.warning("Skipping dataset logging to MLflow: %s", exc)
+        # log parameters
+        mlflow.log_params(model.get_params())
 
-            sample_X = X_train.sample(20, random_state=42)
-            sample_y = model.predict(sample_X)
-            model_signature = mlflow.models.infer_signature(model_input=sample_X, model_output=sample_y)
+        # log metrics
+        mlflow.log_metric("train_mae",train_mae)
+        mlflow.log_metric("test_mae",test_mae)
+        mlflow.log_metric("train_r2",train_r2)
+        mlflow.log_metric("test_r2",test_r2)
+        mlflow.log_metric("mean_cv_score",-(cv_scores.mean()))
 
-            mlflow.sklearn.log_model(
-                model,
-                "delivery_time_pred_model",
-                signature=model_signature,
-                skops_trusted_types=[
-                    "collections.OrderedDict",
-                    "lightgbm.basic.Booster",
-                    "lightgbm.sklearn.LGBMRegressor",
-                    "sklearn.utils._bunch.Bunch",
-                ],
-            )
+        # log individual cv scores
+        mlflow.log_metrics({f"CV {num}": score for num, score in enumerate(-cv_scores)})
+        
+        # mlflow dataset input datatype
+        train_data_input = mlflow.data.from_pandas(train_data,targets=TARGET)
+        test_data_input = mlflow.data.from_pandas(test_data,targets=TARGET)
+        
+        # log input
+        mlflow.log_input(dataset=train_data_input,context="training")
+        mlflow.log_input(dataset=test_data_input,context="validation")
+        
+        # model signature
+        model_signature = mlflow.models.infer_signature(model_input=X_train.sample(20,random_state=42),
+                                    model_output=model.predict(X_train.sample(20,random_state=42)))
+        
+        # log the final model
+        mlflow.sklearn.log_model(
+            model,
+            "delivery_time_pred_model",
+            signature=model_signature,
+            skops_trusted_types=[
+                "collections.OrderedDict",
+                "lightgbm.basic.Booster",
+                "lightgbm.sklearn.LGBMRegressor",
+                "sklearn.utils._bunch.Bunch",
+            ],
+        )
 
-            for artifact in [
-                root_path / "models" / "stacking_regressor.joblib",
-                root_path / "models" / "power_transformer.joblib",
-                root_path / "models" / "preprocessor.joblib",
-            ]:
-                if artifact.exists():
-                    try:
-                        mlflow.log_artifact(artifact)
-                    except Exception as exc:
-                        logger.warning("Skipping artifact logging for %s: %s", artifact, exc)
-
-            artifact_uri = mlflow.get_artifact_uri()
-            logger.info("Mlflow logging complete and model logged")
-        except Exception as exc:
-            logger.warning("MLflow logging failed, continuing with local run: %s", exc)
-            artifact_uri = ""
-
+        # log stacking regressor
+        mlflow.log_artifact(root_path / "models" / "stacking_regressor.joblib")
+        
+        # log the power transformer
+        mlflow.log_artifact(root_path / "models" / "power_transformer.joblib")
+        
+        # log the preprocessor
+        mlflow.log_artifact(root_path / "models" / "preprocessor.joblib")
+        
+        # get the current run artifact uri
+        artifact_uri = mlflow.get_artifact_uri()
+        
+        logger.info("Mlflow logging complete and model logged")
+        
+    # get the run id 
     run_id = run.info.run_id
     model_name = "delivery_time_pred_model"
     

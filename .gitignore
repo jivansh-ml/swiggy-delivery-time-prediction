@@ -88,6 +88,6 @@ target/
 .mypy_cache/
 /run_information.json
 
-# Project data
-data/cleaned/
+
+
 
