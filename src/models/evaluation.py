@@ -11,9 +11,8 @@ import json
 
 # initialize dagshub
 import dagshub
-dagshub.init(repo_owner='jivanshs51',
-              repo_name='swiggy-delivery-time-prediction',
-                mlflow=True)
+dagshub.init(repo_owner='jivanshs51', repo_name='swiggy-delivery-time-prediction', mlflow=True)
+
 
 # set the mlflow tracking server
 mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction.mlflow")
@@ -149,23 +148,15 @@ if __name__ == "__main__":
         # log input
         mlflow.log_input(dataset=train_data_input,context="training")
         mlflow.log_input(dataset=test_data_input,context="validation")
-        
+         
         # model signature
         model_signature = mlflow.models.infer_signature(model_input=X_train.sample(20,random_state=42),
                                     model_output=model.predict(X_train.sample(20,random_state=42)))
         
         # log the final model
-        mlflow.sklearn.log_model(
-            model,
-            "delivery_time_pred_model",
-            signature=model_signature,
-            skops_trusted_types=[
-                "collections.OrderedDict",
-                "lightgbm.basic.Booster",
-                "lightgbm.sklearn.LGBMRegressor",
-                "sklearn.utils._bunch.Bunch",
-            ],
-        )
+        mlflow.sklearn.log_model(model,"delivery_time_pred_model",signature=model_signature,
+                                 skops_trusted_types=['collections.OrderedDict','lightgbm.basic.Booster',
+                                                      'lightgbm.sklearn.LGBMRegressor','sklearn.utils._bunch.Bunch'])
 
         # log stacking regressor
         mlflow.log_artifact(root_path / "models" / "stacking_regressor.joblib")

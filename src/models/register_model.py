@@ -26,9 +26,8 @@ handler.setFormatter(formatter)
 import dagshub
 import mlflow.client
 
-dagshub.init(repo_owner='jivanshs51',
-              repo_name='swiggy-delivery-time-prediction',
-                mlflow=True)
+dagshub.init(repo_owner='jivanshs51', repo_name='swiggy-delivery-time-prediction', mlflow=True)
+
 
 # set the mlflow tracking server
 mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction.mlflow")
