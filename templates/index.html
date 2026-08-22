@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Delivery Time Prediction</title>
+</head>
+
+<body>
+
+    <h1>Predict Delivery Time</h1>
+
+    <form action="/predict" method="post">
+
+        <p>Delivery Person Age:
+            <input type="number" name="age" required>
+        </p>
+
+        <p>Delivery Person Ratings:
+            <input type="number" step="0.1" name="ratings" required>
+        </p>
+
+        <p>Weather:
+            <select name="weather" required>
+                <option value="">-- Select --</option>
+                <option value="sunny">Sunny</option>
+                <option value="cloudy">Cloudy</option>
+                <option value="stormy">Stormy</option>
+                <option value="sandstorms">Sandstorms</option>
+                <option value="windy">Windy</option>
+                <option value="fog">Fog</option>
+            </select>
+        </p>
+
+        <p>Road Traffic:
+            <select name="traffic" required>
+                <option value="">-- Select --</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="jam">Jam</option>
+            </select>
+        </p>
+
+        <p>Vehicle Condition (0, 1, or 2):
+            <select name="vehicle_condition" required>
+                <option value="">-- Select --</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+        </p>
+
+        <p>Type of Order:
+            <select name="type_of_order" required>
+                <option value="">-- Select --</option>
+                <option value="snack">Snack</option>
+                <option value="meal">Meal</option>
+                <option value="drinks">Drinks</option>
+                <option value="buffet">Buffet</option>
+            </select>
+        </p>
+
+        <p>Type of Vehicle:
+            <select name="type_of_vehicle" required>
+                <option value="">-- Select --</option>
+                <option value="motorcycle">Motorcycle</option>
+                <option value="scooter">Scooter</option>
+                <option value="electric_scooter">Electric Scooter</option>
+                <option value="bicycle">Bicycle</option>
+            </select>
+        </p>
+
+        <p>Multiple Deliveries (0, 1, 2, or 3):
+            <select name="multiple_deliveries" required>
+                <option value="">-- Select --</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </p>
+
+        <p>Festival:
+            <select name="festival" required>
+                <option value="">-- Select --</option>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+            </select>
+        </p>
+
+        <p>City Type:
+            <select name="city_type" required>
+                <option value="">-- Select --</option>
+                <option value="metropolitian">Metropolitian</option>
+                <option value="urban">Urban</option>
+                <option value="semi-urban">Semi-Urban</option>
+            </select>
+        </p>
+
+        <p>Is Weekend:
+            <select name="is_weekend" required>
+                <option value="">-- Select --</option>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+        </p>
+
+        <p>Pickup Time (in minutes):
+            <input type="number" step="0.1" name="pickup_time_minutes" required>
+        </p>
+
+        <p>Order Time of Day:
+            <select name="order_time_of_day" required>
+                <option value="">-- Select --</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="evening">Evening</option>
+                <option value="night">Night</option>
+                <option value="after_midnight">After Midnight</option>
+            </select>
+        </p>
+
+        <p>Distance (in km):
+            <input type="number" step="0.1" name="distance" required>
+        </p>
+
+        <p>Distance Type:
+            <select name="distance_type" required>
+                <option value="">-- Select --</option>
+                <option value="short">Short </option>
+                <option value="medium">Medium </option>
+                <option value="long">Long </option>
+                <option value="very_long">Very Long </option>
+            </select>
+        </p>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    <br>
+    <hr>
+
+    {% if result %}
+    <h2 style="color: green;">Estimated Delivery Time: {{ result }} minutes</h2>
+    {% endif %}
+
+    {% if error %}
+    <h2 style="color: red;">Error: {{ error }}</h2>
+    {% endif %}
+
+</body>
+
+</html>
