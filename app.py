@@ -10,7 +10,11 @@ set_config(transform_output='pandas')
 
 import dagshub
 
-dagshub.init(repo_owner='jivanshs51', repo_name='swiggy-delivery-time-prediction', mlflow=True)
+try:
+    dagshub.init(repo_owner='jivanshs51', repo_name='swiggy-delivery-time-prediction', mlflow=True)
+except Exception as e:
+    print("Skipping dagshub.init on server deployment.")
+    
 mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction.mlflow")
 
 
