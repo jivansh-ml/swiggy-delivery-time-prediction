@@ -21,12 +21,8 @@ mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-pre
 app=Flask(__name__)
 
 
-# load the model info to get the model name
-model_name = "delivery_time_pred_model"
-
-stage = "Production"
-model_path = f"models:/{model_name}/{stage}"
-model = mlflow.sklearn.load_model(model_path)
+# load the model locally (which will be downloaded by DVC on Render)
+model = joblib.load('models/model.joblib')
 
 
 preprocessor_path = 'models/preprocessor.joblib'
