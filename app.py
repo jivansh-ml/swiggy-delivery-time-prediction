@@ -2,16 +2,13 @@ import joblib
 import pandas as pd
 from flask import Flask,render_template,request
 import mlflow
-import json
-from mlflow import MlflowClient
 from sklearn import set_config
-from scripts.data_cleaning_utils import perform_data_cleaning
+
 from sklearn.pipeline import Pipeline
 
 set_config(transform_output='pandas')
 
 import dagshub
-import mlflow.client
 
 dagshub.init(repo_owner='jivanshs51', repo_name='swiggy-delivery-time-prediction', mlflow=True)
 mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction.mlflow")
@@ -19,30 +16,17 @@ mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-pre
 
 app=Flask(__name__)
 
-#columns to preprocess
-num_cols=['age','ratings','pickup_time_minutes','distance']
-nominal_cat_cols = ['weather','type_of_order','type_of_vehicle','festival','city_type','is_weekend','order_time_of_day']
-ordinal_cat_cols = ['traffic','distance_type']
-
-def load_model_information(file_path):
-    with open(file_path) as f:
-        run_info = json.load(f)
-        
-    return run_info
-
-def load_transformer(transformer_path):
-    transformer = joblib.load(transformer_path)
-    return transformer
 
 # load the model info to get the model name
-model_name = load_model_information("run_information.json")['model_name']
+model_name = "delivery_time_pred_model"
 
-client = MlflowClient()
+stage = "Production"
+model_path = f"models:/{model_name}/{stage}"
+model = mlflow.sklearn.load_model(model_path)
 
-model = joblib.load('models/model.joblib')
 
 preprocessor_path = 'models/preprocessor.joblib'
-preprocessor = load_transformer(preprocessor_path)
+preprocessor = joblib.load(preprocessor_path)
 
 model_pipe = Pipeline(steps=[
       ('preprocess',preprocessor),
@@ -85,7 +69,7 @@ def predict():
             }
 
             df = pd.DataFrame(data)
-            # get the predictions directly since the form already provides cleaned data
+            
             predictions = model_pipe.predict(df)[0]
 
             return render_template('index.html', result=round(predictions, 2))
