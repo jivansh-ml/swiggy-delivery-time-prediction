@@ -1,9 +1,7 @@
-import os
 import joblib
 import pandas as pd
 from flask import Flask,render_template,request
 import mlflow
-from mlflow.artifacts import download_artifacts
 from sklearn import set_config
 
 from sklearn.pipeline import Pipeline
@@ -23,19 +21,19 @@ mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-pre
 app=Flask(__name__)
 
 
-# Download and load model and preprocessor directly from Dagshub via MLflow
-RUN_ID = "c30df58ee1c5485ba333cecb12be5341"
+# load the model locally (which will be downloaded by DVC on Render)
+model = joblib.load('models/model.joblib')
+print('model loaded successfully')
 
-model_local_path = download_artifacts(f"runs:/{RUN_ID}/stacking_regressor.joblib")
-model = joblib.load(model_local_path)
-
-preprocessor_local_path = download_artifacts(f"runs:/{RUN_ID}/preprocessor.joblib")
-preprocessor = joblib.load(preprocessor_local_path)
+preprocessor_path = 'models/preprocessor.joblib'
+preprocessor = joblib.load(preprocessor_path)
+print('preprocessor loaded successfully')
 
 model_pipe = Pipeline(steps=[
       ('preprocess',preprocessor),
       ('regressor',model)
 ])
+print('pipeline created successfully')
 @app.route('/')
 def home():
     return render_template('index.html')
