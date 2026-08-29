@@ -1,27 +1,17 @@
 import joblib
 import pandas as pd
 from flask import Flask,render_template,request
-import mlflow
+
 from sklearn import set_config
 
 from sklearn.pipeline import Pipeline
 
 set_config(transform_output='pandas')
 
-import dagshub
-
-try:
-    dagshub.init(repo_owner='jivanshs51', repo_name='swiggy-delivery-time-prediction', mlflow=True)
-except Exception as e:
-    print("Skipping dagshub.init on server deployment.")
-    
-mlflow.set_tracking_uri("https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction.mlflow")
-
 
 app=Flask(__name__)
 
 
-# load the model locally (which will be downloaded by DVC on Render)
 model = joblib.load('models/model.joblib')
 print('model loaded successfully')
 
