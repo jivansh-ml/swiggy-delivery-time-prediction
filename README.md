@@ -6,7 +6,15 @@ An end-to-end machine learning pipeline that predicts food delivery time using t
 📊 **Experiment Tracking:** [DagsHub Project](https://dagshub.com/jivanshs51/swiggy-delivery-time-prediction)
 
 ---
+## Dashboard
 
+Power BI dashboard on the cleaned data: [View live dashboard](https://app.powerbi.com/reportEmbed?reportId=fec21900-be54-4133-b04f-ea5367ee04f6&autoAuth=true&ctid=56c1d497-700b-49cf-8f8d-3dd6b20d522f) | [View PDF](reports/swiggy_delivery_time_prediction.pdf)
+
+- Average delivery time is 26.6 min, and 22.8% of orders are delayed
+- Jam traffic averages 31.4 min vs 21.5 min for low traffic
+- Semi-urban orders average 49.7 min vs 23.3 min for urban
+
+---
 ## Overview
 
 This project predicts how long a food delivery will take based on rider, weather, traffic, and order-level features from the Swiggy dataset. It covers the full ML lifecycle — from raw data cleaning to a model served through a Flask web app on Render.
