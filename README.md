@@ -146,6 +146,4 @@ The application is deployed on **Render**: https://delivery-time-prediction-vgk0
 ---
 
 
-## License
-
-[Add your license here]
+your license here]
