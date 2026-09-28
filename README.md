@@ -144,6 +144,3 @@ The app loads `model.joblib` and `preprocessor.joblib` directly from disk for in
 The application is deployed on **Render**: https://delivery-time-prediction-vgk0.onrender.com/
 
 ---
-
-
-your license here]
