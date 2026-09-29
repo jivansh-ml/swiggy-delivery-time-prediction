@@ -86,32 +86,6 @@ The final model is a **stacking regressor** combining tuned Random Forest and Li
 
 ---
 
-## Project Structure
-
-```
-├── data/           # DVC-tracked raw and processed data
-├── models/         # trained model and transformers
-├── notebooks/      # EDA, experiments, model selection
-├── references/
-├── reports/
-├── scripts/
-├── src/
-│   ├── data/       # cleaning, preparation, preprocessing
-│   └── model/      # train, evaluate, register
-├── templates/      # Flask HTML templates
-├── tests/
-├── app.py          # Flask application
-├── dvc.yaml        # pipeline definition
-├── dvc.lock
-├── params.yaml     # pipeline parameters
-├── requirements.txt
-├── LICENSE
-└── README.md
-```
-
-> Update this section to match your actual repo layout.
-
----
 
 ## Setup & Installation
 
